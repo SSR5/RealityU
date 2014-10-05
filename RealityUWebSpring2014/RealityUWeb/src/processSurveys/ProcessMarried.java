@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import obj.Group;
 import obj.Survey;
 import dao.SurveysDAO;
 
@@ -36,7 +35,7 @@ public class ProcessMarried {
 
 	private double marriedRequirementRatio = .40; // 40%
 
-	private double divorcedRequirementRatio = .35; // 35%
+	private double divorcedRequirementRatio = .35; // 35%	
 
 	/**
 	 * Do processing to assign Marriages/Spouses.
@@ -75,7 +74,8 @@ public class ProcessMarried {
 			} // end if married code block
 			
 			// Populate single lists
-			if (survey.getMarried().equals("No")) {
+			//if (survey.getMarried().equals("No")) {    Changed by Evgeniya Koganitskaya 10/05/2014
+			else{
 				if (survey.getGender().equals("Male")) // Single Male
 					listOfSingleMales.add(survey);
 				else  // Single Female
@@ -89,7 +89,6 @@ public class ProcessMarried {
 		int numEachNeeded = (int) Math.round(totalMarriedNeeded/2.0); // need 50/50 male/female
 		System.out.println("TotalMarriedNeeded: " + totalMarriedNeeded + ", NumEachNeeded: " + numEachNeeded +
 				", # Male: " + listOfMarriedMales.size() + ", # Female: " + listOfMarriedFemales.size());
-		
 		// Set Married & Some Divorced if needed to meet married ratio
 		setMarriedMales(numEachNeeded);
 		setMarriedFemales(numEachNeeded);
@@ -106,7 +105,16 @@ public class ProcessMarried {
 		// Set Divorced, Make sure we have 35% of the group divorced
 		setDivorcedMales(numEachNeededDiv);
 		setDivorcedFemales(numEachNeededDiv);
-
+		// Add by Evgeniya Koganitskaya for testing
+		System.out.println(listOfMales.size());
+		System.out.println(listOfFemales.size());
+		System.out.println(listOfMarriedMales.size());
+		System.out.println(listOfMarriedFemales.size());
+		System.out.println(listOfSingleFemales.size());
+		System.out.println(listOfSingleMales.size());
+		System.out.println(listOfDivorcedMales.size());
+		System.out.println(listOfDivorcedFemales.size());
+		
 		System.out.println("Leaving ProcessMarried.doProcess() method.");
 		System.out.println("-------------------------\n");
 		
@@ -213,13 +221,13 @@ public class ProcessMarried {
 					marriedFemale.setSpouse(marriedMale.getId());
 					sd.update(marriedFemale);
 
-				} else { break; } // no point in looping through the rest if no more eligible females although number should be equal
+				} else { break; } // no point in looping through the rest if no more eligible females altho # should be =
 			} // end for Loop
 			
 			// Set whatever spouseless marriages that are left over to
 			// marital status of single. There shouldn't be any, but do as a safety.
 			for (int i = 0; i < listOfMarriedMales.size(); i++ ) {
-				//Handle any Married not assigned a Spouse
+				//Male/Female Spouses should've been = number, but as safety, handle any Married not assigned a Spouse
 				if (listOfMarriedMales.get(i).getSpouse() == 0 || (Integer)listOfMarriedMales.get(i).getSpouse() == null) {
 					listOfMarriedMales.get(i).setMarried("No");
 					sd.update(listOfMarriedMales.get(i));
@@ -316,15 +324,12 @@ public class ProcessMarried {
 	
 	
 //  ========================  MAIN METHOD  ==================== 
-	public static void main(String[] args) {
-//		List<Survey> lstSurvey = new ArrayList<Survey>();
-//       //Create SurveysDAO & Survey Objs and Validate Login
-//       SurveysDAO sd = new SurveysDAO();
-//       lstSurvey = sd.search("groupID", "1");
-//       lstSurvey = new ProcessMarried().doProcess(lstSurvey);
- 
-		
-
+	 public static void main(String[] args) {
+	   // List<Survey> lstSurvey = new ArrayList<Survey>();
+       //Create SurveysDAO & Survey Objs and Validate Login
+       //SurveysDAO sd = new SurveysDAO();
+       //lstSurvey = sd.search("groupID", "1");
+       //lstSurvey = new ProcessMarried().doProcess(lstSurvey);  
 	} //end main()	
 
 } //end class

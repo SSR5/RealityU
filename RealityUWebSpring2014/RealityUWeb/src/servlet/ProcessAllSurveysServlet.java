@@ -15,6 +15,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import processSurveys.ProcessChildrenDivorcedFemales;  //imported by E Koganitskaya 10/05/2014
+import processSurveys.ProcessChildrenDivorcedMales;    //imported by E Koganitskaya 10/05/2014
 import processSurveys.ProcessCreditScore;
 import processSurveys.ProcessMarried;
 import processSurveys.ProcessOccupations;
@@ -77,8 +79,8 @@ public class ProcessAllSurveysServlet extends HttpServlet {
 	    			lstSurveys = new ProcessCreditScore().doProcess(lstSurveys);
 	    			lstSurveys = new ProcessMarried().doProcess(lstSurveys);
 	    			//lstSurveys = new ProcessChildren().doProcess(lstSurveys);
-	    			//lstSurveys = new ProcessChildrenDivorcedFemales().doProcess(lstSurveys);
-	    			//lstSurveys = new ProcessChildrenDivorcedMales().doProcess(lstSurveys);
+	    			lstSurveys = new ProcessChildrenDivorcedFemales().doProcess(lstSurveys);//uncommented by E Koganitskaya 10/05/2014 
+	    			lstSurveys = new ProcessChildrenDivorcedMales().doProcess(lstSurveys);  //uncommented by E Koganitskaya 10/05/2014
 	    			//lstSurveys = new ProcessCustodyChildSupport().doProcess(lstSurveys);
 	    			
 	    			msg = "Surveys for "+grp.getName()+" have been successfully processed.";
