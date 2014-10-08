@@ -27,7 +27,7 @@ public class ProcessChildrenDivorcedFemales {
 	private int randomInt;
 	private int randomKids;
 
-	private double percOfDivWithChild = 0.4;                         //Percent of Divorced Females With Children(now 40%)
+	private float percOfDivWithChild = 0.6f;                         //Percent of Divorced Females With Children(now 60%)
     private int numFemaleWithChildNeed;                              //Number of Divorced Females With Children Needed
     private int numFemaleWithNoChildNeed;                            //Number of Divorced Females With No Children Needed
 	
@@ -47,49 +47,44 @@ public List<Survey> doProcess(List<Survey> lstSurveys)
 	{  
 		if (survey.getGender().equals("Female") && survey.getMarried().equals("Divorced")){
 		
-			    lstDivorcedFemales.add(survey);                    // Populate list of Divorced Females  
+			 lstDivorcedFemales.add(survey);                    // Populate list of Divorced Females  
 
-		        if (survey.getChildren().equals("Yes"))
-		        {
-			        lstDivWithChild.add(survey);                    // Populate list of Divorced Females with Children 
-		        }
+		        if (survey.getChildren().equals("Yes")){
+			        lstDivWithChild.add(survey); }                  // Populate list of Divorced Females with Children 
 		       
 		        else
-		        {
-			        lstDivNoChild.add(survey);                     // Populate list of Divorced Females with No Children
-		        }
+		        { lstDivNoChild.add(survey); }                // Populate list of Divorced Females with No Children
+		        
 		   
 		}//End if Female and Divorced
 	}//End for loop
 	
-	// Needed number of Divorced Females With Children(now 40%)
-	numFemaleWithChildNeed = (int)Math.round(lstDivorcedFemales.size()*percOfDivWithChild);
+	// Needed number of Divorced Females With Children(now 60%)
+	numFemaleWithChildNeed = Math.round(lstDivorcedFemales.size()*percOfDivWithChild);
 
-	//Needed number of Divorced Females With No Children(now 60%)
+	//Needed number of Divorced Females With No Children(now 40%)
 	numFemaleWithNoChildNeed = lstDivorcedFemales.size()-numFemaleWithChildNeed;
 
 
 	
-	// If more than 40% of women have children we need to adjust down
+	// If more than 60% of women have children we need to adjust down
 	if (lstDivWithChild.size() > numFemaleWithChildNeed)
 	{
 		adjustChildrenDown();
 	}
-	// If more than 60% of women have NO children we need to adjust up
-	else {
-		if (lstDivNoChild.size() > numFemaleWithNoChildNeed) 
-		{
-			adjustChildrenUp();
-		}
-	}// end else
+	// If more than 40% of women have NO children we need to adjust up
+	if (lstDivNoChild.size() > numFemaleWithNoChildNeed) 
+	{
+		adjustChildrenUp();
+	}
 
 	System.out.println("Leaving ProcessChildrenDivorcedFemales.doProcess() method.");
 	System.out.println("-------------------------\n");
 
-	
-	System.out.println(lstDivorcedFemales.size());
-	System.out.println(lstDivWithChild.size());
-	System.out.println(lstDivNoChild.size());
+	//Test
+	System.out.println("List of Divorced Females size = "+lstDivorcedFemales.size());
+	System.out.println("List of Divorced Females With Children size = "+lstDivWithChild.size());
+	System.out.println("List of Divorced Females With No Children size = "+lstDivNoChild.size());
 	
 	
 	grpID = lstSurveys.get(0).getId();                                  //Find Group ID
@@ -154,12 +149,12 @@ public void adjustChildrenDown() {
 	lstDivNoChild.clear();
 }
    public static void main(String[] args)
-   {   	   //List<Survey> lstSurvey = new ArrayList<Survey>();
+   {   	   List<Survey> lstSurvey = new ArrayList<Survey>();
            //Create SurveysDAO & Survey Objs and Validate Login
-           //SurveysDAO sd = new SurveysDAO();
-           //lstSurvey = sd.search("groupID", "1");
-           //System.out.println(lstSurvey.size());
-	       //lstSurvey = new ProcessChildrenDivorcedFemales().doProcess(lstSurvey);
+           SurveysDAO sd = new SurveysDAO();
+           lstSurvey = sd.search("groupID", "1");
+           System.out.println(lstSurvey.size());
+	       lstSurvey = new ProcessChildrenDivorcedFemales().doProcess(lstSurvey);
 	      
    }// End main()
 } // End class

@@ -1,7 +1,8 @@
 package processSurveys;
 /********************************************************************
  *	RealityUWeb: ProcessMarried.java
- *  5/5/2014
+ *  Evgeniya Koganitskaya
+ *  10/08/2014
  ********************************************************************/
 import java.util.ArrayList;
 import java.util.List;
@@ -33,9 +34,13 @@ public class ProcessMarried {
 
 	private List<Survey> listOfDivorcedFemales = new ArrayList<>();
 
-	private double marriedRequirementRatio = .40; // 40%
+	private float marriedRequirementRatio = .4f; // 40%
 
-	private double divorcedRequirementRatio = .35; // 35%	
+	private float divorcedRequirementRatio = .35f; // 35%
+	
+	int numEachNeeded = 0;
+	int numDivFemalesNeeded = 0;
+	int numDivMalesNeeded = 0;
 
 	/**
 	 * Do processing to assign Marriages/Spouses.
@@ -44,9 +49,9 @@ public class ProcessMarried {
 	 * @return the list of Surveys after being processed
 	 */
 	public List<Survey> doProcess(List<Survey> surveysList) {
+
 		System.out.println("Entering ProcessMarried.doProcess() method.");
 		// populate the various survey lists from main survey list
-
 		//Can use any survey in surveysList to get Group ID (all grp id's are same)
 		int grpID = surveysList.get(0).getId();
 		clearLists();
@@ -54,66 +59,109 @@ public class ProcessMarried {
 		for (Survey survey : surveysList) {
 
 			// Populate gender lists
+			//Male
 			if (survey.getGender().equals("Male")) {
 				listOfMales.add(survey);
 				survey.setSpouse(0); // clear the list for processing
 				sd.update(survey);
 			}
-			else {// Female
+			// Female
+			else {
 				listOfFemales.add(survey);
 				survey.setSpouse(0); // clear the list for processing
 				sd.update(survey);
-			}
-
-			// Populate married lists
+			}	
+			// Populate married list
 			if (survey.getMarried().equals("Yes")) {
 				if (survey.getGender().equals("Male")) // Married Male
 					listOfMarriedMales.add(survey);
 				else // Married Female
 					listOfMarriedFemales.add(survey);
-			} // end if married code block
-			
-			// Populate single lists
-			//if (survey.getMarried().equals("No")) {    Changed by Evgeniya Koganitskaya 10/05/2014
-			else{
-				if (survey.getGender().equals("Male")) // Single Male
-					listOfSingleMales.add(survey);
-				else  // Single Female
-					listOfSingleFemales.add(survey);
-			} // end if single code block
+			} // end if married code block			
+			// Populate single list
+			else
+				if (survey.getMarried().equals("No")) {
+				    if (survey.getGender().equals("Male")) // Single Male
+					    listOfSingleMales.add(survey);
+				    else  // Single Female
+					    listOfSingleFemales.add(survey);
+			      } // end if single code block			    
+			// Change divorced to Single
+		    else 
+				if (survey.getMarried().equals("Divorced")){
+					if (survey.getGender().equals("Male")){
+						survey.setMarried("No");
+						sd.update(survey);
+						listOfSingleMales.add(survey);}
+					else{
+						survey.setMarried("No");
+						sd.update(survey);
+						listOfSingleFemales.add(survey);}
+				}
+             } // end for loop
 
-		} // end for loop
-
-		//Determine number of Male/Female Married Needed to match marriedRequirementRatio
-		double totalMarriedNeeded = marriedRequirementRatio * surveysList.size();
-		int numEachNeeded = (int) Math.round(totalMarriedNeeded/2.0); // need 50/50 male/female
-		System.out.println("TotalMarriedNeeded: " + totalMarriedNeeded + ", NumEachNeeded: " + numEachNeeded +
-				", # Male: " + listOfMarriedMales.size() + ", # Female: " + listOfMarriedFemales.size());
+		//Determine number of Male/Female Married Needed to match marriedRequirementRatio		
+		if (listOfMales.size() > listOfFemales.size()){
+			numEachNeeded = Math.round(listOfFemales.size()*marriedRequirementRatio);}
+		else{
+			numEachNeeded = Math.round(listOfMales.size()*marriedRequirementRatio);}
+				
 		// Set Married & Some Divorced if needed to meet married ratio
-		setMarriedMales(numEachNeeded);
-		setMarriedFemales(numEachNeeded);
+		
+		if (listOfMarriedMales.size() < numEachNeeded){
+		setMarriedMalesUp();}
+		
+		if(listOfMarriedMales.size() > numEachNeeded){
+		setMarriedMalesDown();}
+		
+		if (listOfMarriedFemales.size() < numEachNeeded){
+		setMarriedFemalesUp();}
+		
+		if (listOfMarriedFemales.size() > numEachNeeded){
+		setMarriedFemalesDown();}
 
 		// Set spouses
 		setSpouses();
 	
 		//Determine number of Male/Female Divorced Needed to match divorcedRequirementRatio
-		double totalDivorcedNeeded = divorcedRequirementRatio * surveysList.size();
-		int numEachNeededDiv = (int) Math.round(totalDivorcedNeeded/2.0); // need 50/50 male/female
-		System.out.println("TotalDivorcedNeeded: " + totalDivorcedNeeded + ", NumEachNeeded: " + numEachNeededDiv +
-				", # Male: " + listOfDivorcedMales.size() + ", # Female: " + listOfDivorcedFemales.size());
+		numDivMalesNeeded = Math.round(listOfMales.size()*divorcedRequirementRatio);
+		numDivFemalesNeeded = Math.round(listOfFemales.size()*divorcedRequirementRatio); 
 		
 		// Set Divorced, Make sure we have 35% of the group divorced
-		setDivorcedMales(numEachNeededDiv);
-		setDivorcedFemales(numEachNeededDiv);
-		// Add by Evgeniya Koganitskaya for testing
-		System.out.println(listOfMales.size());
-		System.out.println(listOfFemales.size());
-		System.out.println(listOfMarriedMales.size());
-		System.out.println(listOfMarriedFemales.size());
-		System.out.println(listOfSingleFemales.size());
-		System.out.println(listOfSingleMales.size());
-		System.out.println(listOfDivorcedMales.size());
-		System.out.println(listOfDivorcedFemales.size());
+		if (listOfDivorcedMales.size() < numDivMalesNeeded){
+		    setDivorcedMalesUp();}
+		
+		if (listOfDivorcedMales.size() > numDivMalesNeeded){	
+			setDivorcedMalesDown();}
+		
+		if (listOfDivorcedFemales.size() < numDivFemalesNeeded){
+			setDivorcedFemalesUp();}
+		
+		if (listOfDivorcedFemales.size() > numDivFemalesNeeded){
+		setDivorcedFemalesDown();}
+		
+		//Set children to 0 for Single Males and Females	
+		for(Survey survey: listOfSingleMales){
+			survey.setChildren("No");
+			survey.setNumChild(0);
+			sd.update(survey);
+		}
+		for(Survey survey: listOfSingleFemales){
+			survey.setChildren("No");
+			survey.setNumChild(0);
+			sd.update(survey);
+		}
+		
+		// Test
+		System.out.println("Total = "+surveysList.size());
+		System.out.println("List of Males size = "+listOfMales.size());
+		System.out.println("List of Females size = "+listOfFemales.size());
+		System.out.println("List of Married Males size = "+listOfMarriedMales.size());
+		System.out.println("List of Married Females size = "+listOfMarriedFemales.size());
+		System.out.println("List of Single Males size = "+listOfSingleMales.size());
+		System.out.println("List of Single Females size = "+listOfSingleFemales.size());
+		System.out.println("List of Divorced Males size = "+listOfDivorcedMales.size());
+		System.out.println("List of Divorced Females size = "+listOfDivorcedFemales.size());
 		
 		System.out.println("Leaving ProcessMarried.doProcess() method.");
 		System.out.println("-------------------------\n");
@@ -121,77 +169,60 @@ public class ProcessMarried {
 		//After all processing get revised list of surveys for this group
 		surveysList = sd.search("groupID", ""+grpID);
 		return surveysList;
+	
 	} // end doProcess() method
-
-	/**
-	 * Loop through males and make some married or divorced until get correct number.
-	 */
-	public void setMarriedMales(int numEachNeeded) {
-
+	
+	public void setMarriedMalesUp() {
 		Random random = new Random();
-			
 		while (listOfMarriedMales.size() < numEachNeeded) {
-			//Break out of loop if not enough in list
-			if (listOfSingleMales.size() <= 0) { break; }
-			
 			Survey survey = listOfSingleMales.get(random.nextInt(listOfSingleMales.size()));
 			//Change from Single to Married
 			survey.setMarried("Yes");
 			sd.update(survey);
 			listOfSingleMales.remove(survey);
 			listOfMarriedMales.add(survey);
-
 		} // end while
-		
+	}
+
+	public void setMarriedMalesDown()	{
+		Random random = new Random();
 		while (listOfMarriedMales.size() > numEachNeeded) {
-			//Break out of loop if not enough in list
-			if (listOfMarriedMales.size() <= 0) { break; }
-			
 			Survey survey = listOfMarriedMales.get(random.nextInt(listOfMarriedMales.size()));
-			//Change from Married to Divorced
-			survey.setMarried("Divorced");
+			//Change from Married to Single
+			survey.setMarried("No");
 			sd.update(survey);
 			listOfMarriedMales.remove(survey);
-			listOfDivorcedMales.add(survey);				
+			listOfSingleMales.add(survey);				
 		} // end while
-		
-		System.out.println("Num Married Males Needed: "+numEachNeeded+", Actual Num: "+listOfMarriedMales.size());
-	} // end of setMarriedMales method
+	}
+
 
 	/**
 	 * Loop through females and make some married or divorced until get correct number.
 	 */
-	public void setMarriedFemales(int numEachNeeded) {
+	public void setMarriedFemalesUp() {
 		
-		Random random = new Random();
-			
+		Random random = new Random();		
 		while (listOfMarriedFemales.size() < numEachNeeded) {
-			//Break out of loop if not enough in list
-			if (listOfSingleFemales.size() <= 0) { break; }
-			
 			Survey survey = listOfSingleFemales.get(random.nextInt(listOfSingleFemales.size()));
 			//Change from Single to Married
 			survey.setMarried("Yes");
 			sd.update(survey);
 			listOfSingleFemales.remove(survey);
 			listOfMarriedFemales.add(survey);
-
 		} // end while
-		
+	}
+	public void setMarriedFemalesDown(){
+		Random random = new Random();
 		while (listOfMarriedFemales.size() > numEachNeeded) {
-			//Break out of loop if not enough in list
-			if (listOfMarriedFemales.size() <= 0) { break; }
-			
 			Survey survey = listOfMarriedFemales.get(random.nextInt(listOfMarriedFemales.size()));
 			//Change from Married to Divorced
-			survey.setMarried("Divorced");
+			survey.setMarried("No");
 			sd.update(survey);
 			listOfMarriedFemales.remove(survey);
-			listOfDivorcedFemales.add(survey);				
+			listOfSingleFemales.add(survey);				
 		} // end while
-		
-		System.out.println("Num Married Females Needed: "+numEachNeeded+", Actual Num: "+listOfMarriedFemales.size());
-	} // end setMarried Females method
+	}
 
 	// ************************************************
 	// ************************************************
@@ -212,8 +243,7 @@ public class ProcessMarried {
 				if ( listOfMarriedFemales.size() > i ) {
 					
 					// Set spouse from parallel List. This is like randomly placing spouses together
-					// since Surveys will be filled out by students in random order. (Could shuffle
-					// the order of surveys or randomly generate if want to mix it up more.)
+					// since Surveys will be filled out by students in random order. 
 					marriedFemale = listOfMarriedFemales.get(i);
 					//Set Married Spouse value as Survey ID #
 					marriedMale.setSpouse(marriedFemale.getId());
@@ -222,94 +252,60 @@ public class ProcessMarried {
 					sd.update(marriedFemale);
 
 				} else { break; } // no point in looping through the rest if no more eligible females altho # should be =
-			} // end for Loop
-			
-			// Set whatever spouseless marriages that are left over to
-			// marital status of single. There shouldn't be any, but do as a safety.
-			for (int i = 0; i < listOfMarriedMales.size(); i++ ) {
-				//Male/Female Spouses should've been = number, but as safety, handle any Married not assigned a Spouse
-				if (listOfMarriedMales.get(i).getSpouse() == 0 || (Integer)listOfMarriedMales.get(i).getSpouse() == null) {
-					listOfMarriedMales.get(i).setMarried("No");
-					sd.update(listOfMarriedMales.get(i));
-					listOfMarriedMales.remove(listOfMarriedMales.get(i));
-					listOfSingleMales.add(listOfMarriedMales.get(i));
-				} //end if
-			} // end male outer loop
-			
-			for (int i = 0; i < listOfMarriedFemales.size(); i++ ) {
-				//Male/Female Spouses should've been = number, but as safety, handle any Married not assigned a Spouse
-				if (listOfMarriedFemales.get(i).getSpouse() == 0 || (Integer)listOfMarriedFemales.get(i).getSpouse() == null) {
-					listOfMarriedFemales.get(i).setMarried("No");
-					sd.update(listOfMarriedFemales.get(i));
-					listOfMarriedFemales.remove(listOfMarriedMales.get(i));
-					listOfSingleFemales.add(listOfMarriedFemales.get(i));
-				} //end if
-			} // end female outer loop			
+			} // end for Loop	
 			
 	} // end setSpouses() method
 
 	/**
 	 * Loop through males and make some divorced.
 	 */
-	public void setDivorcedMales(int numEachNeededDiv) {
-
+	public void setDivorcedMalesUp() {
 		Random rndDivMale = new Random();
-			while (listOfDivorcedMales.size() < numEachNeededDiv) {
-				//Break out of loop if not enough in list
-				if (listOfSingleMales.size() <= 0) { break; }
-				
+			while (listOfDivorcedMales.size() < numDivMalesNeeded) {
 				Survey survey = listOfSingleMales.get(rndDivMale.nextInt(listOfSingleMales.size()));
 				survey.setMarried("Divorced");
 				sd.update(survey);
 				listOfSingleMales.remove(survey);
 				listOfDivorcedMales.add(survey);
 			} // end while loop
-
-			while (listOfDivorcedMales.size() > numEachNeededDiv) {
-				//Break out of loop if not enough in list
-				if (listOfDivorcedMales.size() <= 0) { break; }
-				
+	}
+	public void setDivorcedMalesDown(){
+		Random rndDivMale = new Random();
+			while (listOfDivorcedMales.size() > numDivMalesNeeded) {
 				Survey survey = listOfDivorcedMales.get(rndDivMale.nextInt(listOfDivorcedMales.size()));
-				if (survey.getMarried().equals("Divorced")) {
-					survey.setMarried("No");
-					sd.update(survey);
-					listOfDivorcedMales.remove(survey);
-					listOfSingleMales.add(survey);
-				} // end if
+				survey.setMarried("No");
+				sd.update(survey);
+				listOfDivorcedMales.remove(survey);
+				listOfSingleMales.add(survey);
 			} // end while
-
-	} // end setDivorcedMales() method
+	} 
 
 	/**
 	 * Loop through females and make some divorced.
 	 */
-	public void setDivorcedFemales(int numEachNeededDiv) {
+	public void setDivorcedFemalesUp() {
 
 		Random rndDivFemale = new Random();
-		while (listOfDivorcedFemales.size() < numEachNeededDiv) {
-			//Break out of loop if not enough in list
-			if (listOfSingleFemales.size() <= 0) { break; }
-			
+		while (listOfDivorcedFemales.size() < numDivFemalesNeeded) {
 			Survey survey = listOfSingleFemales.get(rndDivFemale.nextInt(listOfSingleFemales.size()));
 			survey.setMarried("Divorced");
 			sd.update(survey);
 			listOfSingleFemales.remove(survey);
 			listOfDivorcedFemales.add(survey);
 		} // end while loop
-
-		while (listOfDivorcedFemales.size() > numEachNeededDiv) {
-			//Break out of loop if not enough in list
-			if (listOfDivorcedFemales.size() <= 0) { break; }
-			
+	}
+	public void setDivorcedFemalesDown(){
+		Random rndDivFemale = new Random();
+		while (listOfDivorcedFemales.size() > numDivFemalesNeeded) {
 			Survey survey = listOfDivorcedFemales.get(rndDivFemale.nextInt(listOfDivorcedFemales.size()));
-			if (survey.getMarried().equals("Divorced")) {
+			//if (survey.getMarried().equals("Divorced")) {
 				survey.setMarried("No");
 				sd.update(survey);
 				listOfDivorcedFemales.remove(survey);
 				listOfSingleFemales.add(survey);
-			} // end if
+			//} // end if
 		} // end while
-	} // end setDivorcedFemales() method
+	} 
 	
 	private void clearLists() {
 		listOfMales.clear();
@@ -325,11 +321,13 @@ public class ProcessMarried {
 	
 //  ========================  MAIN METHOD  ==================== 
 	 public static void main(String[] args) {
-	   // List<Survey> lstSurvey = new ArrayList<Survey>();
+	    List<Survey> lstSurvey = new ArrayList<Survey>();
        //Create SurveysDAO & Survey Objs and Validate Login
-       //SurveysDAO sd = new SurveysDAO();
-       //lstSurvey = sd.search("groupID", "1");
-       //lstSurvey = new ProcessMarried().doProcess(lstSurvey);  
+       SurveysDAO sd = new SurveysDAO();
+       lstSurvey = sd.search("groupID", "1");
+       lstSurvey = new ProcessMarried().doProcess(lstSurvey);
+       
+
 	} //end main()	
 
 } //end class

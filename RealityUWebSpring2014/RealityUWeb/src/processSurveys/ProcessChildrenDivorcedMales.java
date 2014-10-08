@@ -24,7 +24,7 @@ public class ProcessChildrenDivorcedMales {
 	private int randomInt;
 	private int randomKids;
 
-	private double percOfDivMalesWithChild = 0.4;                    //Percent of Divorced Males With Children(now 40%)
+	private float percOfDivMalesWithChild = 0.6f;                    //Percent of Divorced Males With Children(now 60%)
     private int numMaleWithChildNeed;                              //Number of Divorced Males With Children Needed
     private int numMaleWithNoChildNeed;                            //Number of Divorced Males With No Children Needed
 	
@@ -47,46 +47,37 @@ public List<Survey> doProcess(List<Survey> lstSurveys)
 			    lstDivorcedMales.add(survey);                    // Populate list of Divorced Males  
 
 		        if (survey.getChildren().equals("Yes"))
-		        {
-			        lstDivMalesWithChild.add(survey);            // Populate list of Divorced Males with Children 
-		        }
-		       
+		        {lstDivMalesWithChild.add(survey);  }          // Populate list of Divorced Males with Children 
+		        
 		        else
-		        {
-			        lstDivMalesNoChild.add(survey);              // Populate list of Divorced Males with No Children
-		        }
+		        {lstDivMalesNoChild.add(survey);   }           // Populate list of Divorced Males with No Children
+		        
 		   
 		}//End if Male and Divorced
 	}//End for loop
 	
-	// Needed number of Divorced Males With Children(now 40%)
-	numMaleWithChildNeed = (int)Math.round(lstDivorcedMales.size()*percOfDivMalesWithChild);
+	// Needed number of Divorced Males With Children(now 60%)
+	numMaleWithChildNeed = Math.round(lstDivorcedMales.size()*percOfDivMalesWithChild);
 
-	//Needed number of Divorced Males With No Children(now 60%)
+	//Needed number of Divorced Males With No Children(now 40%)
 	numMaleWithNoChildNeed = lstDivorcedMales.size()-numMaleWithChildNeed;
-
-
 	
-	// If more than 40% of men have children we need to adjust down
-	if (lstDivMalesWithChild.size() > numMaleWithChildNeed)
-	{
-		adjustChildrenDown();
-	}
-	// If more than 60% of men have NO children we need to adjust up
+	// If more than 60% of men have children we need to adjust down
+	if (lstDivMalesWithChild.size() > numMaleWithChildNeed){
+		adjustChildrenDown();}
+	// If more than 40% of men have NO children we need to adjust up
 	else {
-		if (lstDivMalesNoChild.size() > numMaleWithNoChildNeed) 
-		{
-			adjustChildrenUp();
-		}
+		if (lstDivMalesNoChild.size() > numMaleWithNoChildNeed) {
+			adjustChildrenUp();}
 	}// end else
 
 	System.out.println("Leaving ProcessChildrenDivorcedMales.doProcess() method.");
 	System.out.println("-------------------------\n");
 
-	
-	System.out.println(lstDivorcedMales.size());
-	System.out.println(lstDivMalesWithChild.size());
-	System.out.println(lstDivMalesNoChild.size());
+	//Test
+	System.out.println("List of Divorced Males size = "+lstDivorcedMales.size());
+	System.out.println("List of Divorced Males With Children size = "+lstDivMalesWithChild.size());
+	System.out.println("List of Divorced Males With No Children size = "+lstDivMalesNoChild.size());
 	
 	grpID = lstSurveys.get(0).getId();                                  //Find Group ID
 	List <Survey> surveysList = sd.search("groupID", ""+grpID);        //Create list of Surveys for the Group ID
@@ -150,12 +141,12 @@ public void adjustChildrenDown() {
 	lstDivMalesNoChild.clear();
 }
    public static void main(String[] args)
-   {   	   //List<Survey> lstSurvey = new ArrayList<Survey>();
+   {   	   List<Survey> lstSurvey = new ArrayList<Survey>();
            //Create SurveysDAO & Survey Objs and Validate Login
-           //SurveysDAO sd = new SurveysDAO();
-           //lstSurvey = sd.search("groupID", "1");
-           //System.out.println(lstSurvey.size());
-	       //lstSurvey = new ProcessChildrenDivorcedMales().doProcess(lstSurvey);
+           SurveysDAO sd = new SurveysDAO();
+           lstSurvey = sd.search("groupID", "1");
+           System.out.println(lstSurvey.size());
+	       lstSurvey = new ProcessChildrenDivorcedMales().doProcess(lstSurvey);
 	      
    }// End main()
 }// End class
