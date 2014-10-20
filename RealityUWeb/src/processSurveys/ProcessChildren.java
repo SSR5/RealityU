@@ -18,7 +18,7 @@ public class ProcessChildren {
 
 	private List<Survey> marriedFemalesWithNoChildrenList = new ArrayList<>();
 	
-	private  Survey spouseSurvey ;
+	private  List<Survey> spouseSurveys;
 	
 	private double marriedWithChildrenLimitRatio = .5; // target is 50% or .5
 
@@ -58,13 +58,11 @@ public class ProcessChildren {
 				// Count surveys without children
 				else 
 					if (survey.getChildren().equals("No")) {
-						marriedFemalesWithNoChildrenList.add(survey);		}
+						marriedFemalesWithNoChildrenList.add(survey);		
+					}
 			}// end if female and married
 		} // end for loop
-		System.out.println(marriedFemalesWithChildrenList.size());
-		System.out.println(marriedFemalesWithNoChildrenList.size());
-		
-        
+		        
 		// Get percentages of married women with and without children
 		actualChildrenRatio = (double) marriedFemalesWithChildrenList.size()
 				/ marriedFemalesList.size();
@@ -81,21 +79,36 @@ public class ProcessChildren {
 				adjustChildrenUp();
 		}
 		// end else
-		System.out.println(marriedFemalesWithChildrenList.size());
 			
 			// make sure the spouse has the same number of kids
 			for (Survey survey: marriedFemalesWithChildrenList){
 				//Find spouse id
 				int spouseID = survey.getSpouse();
-				System.out.println(spouseID);
+				String spouseId = Integer.toString(spouseID);
 				//Find number of children
 				int numOfChild = survey.getNumChild();
-				System.out.println(numOfChild);
 				//Find Spouse survey
-				spouseSurvey = surveysList.get(spouseID); 
+				spouseSurveys = sd.search("id",spouseId); 
 				//Set the same number of children
-				spouseSurvey.setChildren("Yes");
-				spouseSurvey.setNumChild(numOfChild);	
+				for(Survey surveySp: spouseSurveys){
+				surveySp.setChildren("Yes");
+				surveySp.setNumChild(numOfChild);
+				sd.update(surveySp);
+				}
+			}
+			
+			for(Survey survey : marriedFemalesWithNoChildrenList){
+				//Find spouse id
+				int spouseID = survey.getSpouse();
+				String spouseId = Integer.toString(spouseID);
+				//Find Spouse survey
+				spouseSurveys = sd.search("id",spouseId); 
+				//Set the same number of children
+				for(Survey surveySp: spouseSurveys){
+				surveySp.setChildren("No");
+				surveySp.setNumChild(0);
+				sd.update(surveySp);
+				}
 			}
 
 		System.out.println("Leaving ProcessChildren.doProcess() method.");
