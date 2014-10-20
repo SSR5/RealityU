@@ -11,8 +11,6 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
-import obj.Administrator;
-import obj.Survey;
 import obj.Teacher;
 import dao.DbUtil;
 
@@ -22,6 +20,9 @@ import dao.DbUtil;
  * for adding or changing data about Teachers participating
  * in the RealityU events.
  * @author James Hammond, SSR5		DATE: 10/15/2014
+ * 
+ * EDITED BY:						DATE:			DESCRIPTION:
+ * James Hammond, SSR5				10/20/2014		Added selectAll() method. Added main() method for testing purposes. Testing and debugging completed.
  *
  */
 public class TeachersDAO implements DAO {
@@ -63,6 +64,59 @@ public class TeachersDAO implements DAO {
 
 		return success;
 	}// end createTable()
+	
+	public List<Teacher>selectAll(){
+		
+		
+		//Check Table & Create Table if it doesn't already exist
+		boolean success = createTable();
+		System.out.println("Check if table exists (create if doesn't exist). Table exists: " + success);
+				
+		// Variable Declarations
+		Connection conn = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		List<Teacher>teacherList = new ArrayList<>();
+
+
+		String sql = "";
+
+		try {
+			// Load Driver & Connect to Dbase
+			conn = DbUtil.createConnection();
+
+			// Create SQL Statement
+			sql = "SELECT * FROM Teacher ";
+			stmt = conn.prepareStatement(sql);
+			System.out.println("SQL: " + sql);
+			// Execute Statement - Get ResultSet by Column Name
+			rs = stmt.executeQuery();
+			//Process the ResultSet
+			while (rs.next()) {
+				Teacher teacher = new Teacher();
+
+				teacher.setId(rs.getInt("id"));
+				teacher.setFname(rs.getString("firstName"));
+				teacher.setLname(rs.getString("lastName"));
+				teacher.setPassword(rs.getString("password"));
+				teacher.setSchool(rs.getString("school"));
+
+				teacherList.add(teacher);
+			}// end while
+			
+			} catch (Exception e) {
+					// Handle Errors for Class
+					System.out.println("Class Error. Current DB: " + DB + e);
+				} finally {
+					// Close ResultSet, Query, and Database Connection
+					DbUtil.close(rs);
+					DbUtil.close(stmt);
+					DbUtil.close(conn);
+					System.out.println("Closed Resources");
+				} // End Try/Catch
+
+		return teacherList;
+	}
 	
 	
 	/**
@@ -112,7 +166,7 @@ public class TeachersDAO implements DAO {
 			} //end if
 
 			// Create SQL Statement
-			sql = "SELECT * FROM Survey " + strWhere;
+			sql = "SELECT * FROM Teacher " + strWhere;
 			stmt = conn.prepareStatement(sql);
 			System.out.println("SQL: " + sql);
 
@@ -148,11 +202,11 @@ public class TeachersDAO implements DAO {
 	}// end List<Teacher> search() method
 	
 	/**
-	 * Finds an Administrator by id.
+	 * Finds a Teacher by id.
 	 * 
 	 * @param id
-	 *            : The Administrator id to search for.
-	 * @return Returns an Administrator object with that id.
+	 *            : The Teacher id to search for.
+	 * @return Returns a Teacher object with that id.
 	 */
 	public Teacher select(int id) {
 		// Check Table & Create Table if it doesn't already exist
@@ -231,7 +285,7 @@ public class TeachersDAO implements DAO {
 			conn = DbUtil.createConnection();
 
 			// Create SQL Statement
-			String sql = "UPDATE Teacher SET school=?, password=?, fname=?, lname=? "
+			String sql = "UPDATE Teacher SET school=?, password=?, firstName=?, lastName=? "
 					+ "WHERE id=?";
 
 			stmt = conn.prepareStatement(sql);
@@ -257,19 +311,17 @@ public class TeachersDAO implements DAO {
 	}// end update(Teacher)
 	
 	/**
-	 * Insert a new Administrator.
+	 * Insert a new Teacher.
 	 * 
 	 * @param username
-	 *            : The Administrator username
+	 *            : The Teacher username
 	 * @param password
-	 *            : The Administrator password
+	 *            : The Teacher password
 	 * @param fname
-	 *            : The Administrator fname
+	 *            : The Teacher fname
 	 * @param lname
-	 *            : The Administrator lname
-	 * @return Returns an integer:<br>
-	 *         0: Failure<br>
-	 *         1: Success
+	 *            : The Teacher lname
+	 *            
 	 */
 	public void insert(Teacher teacher) {
 		// Check Table & Create Table if it doesn't already exist
@@ -289,7 +341,7 @@ public class TeachersDAO implements DAO {
 			conn = DbUtil.createConnection();
 
 			// Create SQL Statement
-			String sql = "INSERT INTO Administrator (school, password, fname, lname) "
+			String sql = "INSERT INTO Teacher (school, password, firstName, lastName) "
 					+ "VALUES (?,?,?,?)";
 
 			stmt = conn.prepareStatement(sql);
@@ -315,10 +367,10 @@ public class TeachersDAO implements DAO {
 	}// end insert(Teacher)
 	
 	/**
-	 * Delete an Administrator.
+	 * Delete an Teacher.
 	 * 
 	 * @param admin
-	 *            : The Administrator to delete
+	 *            : The Teacher to delete
 	 *            
 	 */
 	public void delete(Teacher teacher) {
@@ -337,7 +389,7 @@ public class TeachersDAO implements DAO {
 			conn = DbUtil.createConnection();
 
 			// Create SQL Statement
-			String sql = "DELETE FROM Administrator WHERE id = ?";
+			String sql = "DELETE FROM Teacher WHERE id = ?";
 			stmt = conn.prepareStatement(sql);
 			stmt.setInt(1, teacher.getId());
 			System.out.println("SQL: " + sql);
@@ -357,7 +409,40 @@ public class TeachersDAO implements DAO {
 
 	}// end delete(Teacher)
 	
+// =================== MAIN METHOD ================ //
 	
+	public static void main(String[] args){
+//	// -------- START createTable() TEST --------- //
+//		TeachersDAO dao = new TeachersDAO();
+//		System.out.println(dao.createTable());
+//	// -------- END createTable() TEST ---------- //
+		
+//	// ---------- START insert(Teacher) TEST ---------- //
+//		Teacher teacher = new Teacher();
+//		TeachersDAO dao = new TeachersDAO();
+//		dao.insert(teacher);
+//	// ---------- END insert(Teacher) TEST ------------ //
+	
+//	// ----------- START select(int) TEST -------------- //
+//		TeachersDAO dao = new TeachersDAO();
+//		Teacher teacher = dao.select(1);
+//		teacher.display();
+//	// ------------ END select(int) TEST -------------- //
+		
+//	// ------------ START update(Teacher) TEST ------------- //
+//		TeachersDAO dao = new TeachersDAO();
+//		Teacher teacher = dao.select(1);
+//		teacher.setFname("James");
+//		dao.update(teacher);
+//	// ------------- END update(Teacher) TEST -------------- //
+		
+//	// ------------- START delete(Teacher) TEST ------------ //
+//		TeachersDAO dao = new TeachersDAO();
+//		Teacher teacher = dao.select(1);
+//		dao.delete(teacher);
+//	// ------------- END delete(Teacher) TEST ------------- //
+		
+	}
 	
 	
 }// end class

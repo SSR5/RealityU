@@ -13,7 +13,7 @@ public interface DAO {
 	static final String JDBC_DRIVER = "org.sqlite.JDBC";
 
 	/** The Constant DB. */
-	static final String DB = "jdbc:sqlite:D:\\MyDocuments\\CTCSpring2014\\CIST2931_AdvSysProj\\Workspace\\RealityUWeb\\realityu_production.dat";
+	static final String DB = "jdbc:sqlite:C:\\Users\\User\\Desktop\\Eclipse JEE\\RealityUWorkSpace\\RealityUWebSpring2014\\RealityUWeb\\realityu_production.dat";
 
 	/** The Constant USER. */
 	static final String USER = "project";
