@@ -22,6 +22,7 @@ import processSurveys.ProcessOccupations;
  * James Hammond, SSR5		10/02/2014		Created random generator method for education.
  * James Hammond, SSR5		10/03/2014		Finished createGroupSurveys() and deleteGroupSurveys(). Created getTestGroup().
  * James Hammond. SSR5		10/07/2014		Class name changed from "CreateTestGroup" to "TestGroupGenerator"
+ * James Hammond, SSR5		10/23/2014		Modified createGroupSurveys method to accept two string parameters.
  * 
  */
 
@@ -40,16 +41,16 @@ public class TestGroupGenerator {
 	
 	// properties for testGroup1 creation
 	
-	String groupName = "testGroup";
-	String created = "";
-	String modified = "";
-	String highSchool = "testSchool";
-	String teacher = "mr.Test";
-	String classPeriod = "testPeriod";
-	String surveyStartDate = "";
-	String surveyEndDate = "";
-	String eventDate = "";
-	String studentAccessCode = "Test123";
+	String groupName;
+	String created;
+	String modified;
+	String school;
+	String teacher;
+	String classPeriod;
+	String surveyStartDate;
+	String surveyEndDate;
+	String eventDate;
+	String studentAccessCode;
 	
 	List<Survey> testGroupSurveys;
 	
@@ -77,16 +78,27 @@ public class TestGroupGenerator {
 	 * This was done to make it easier to assign the test 
 	 * surveys to the correct group every time it is created.
 	 * No longer returns Group object, now Returns List<Survey>
+	 * 
+	 * UPDATE: 10/23/2014 **
+	 * This method now takes two string parameters.
+	 * This is to allow for easier creation of multiple
+	 * test groups.
+	 * @param name
+	 * 		The desired name of the group to be created
+	 * @param accessCode
+	 * 		The desired access code for the group to be created
 	 */
-	public List<Survey> createGroupSurveys(){
+	public List<Survey> createGroupSurveys(String name, String accessCode){
+		// assign group values
+		
 		// add group data to the database
-		int rows = testGroupDao.insert(groupName, created, modified, highSchool, 
+		int rows = testGroupDao.insert(name, created, modified, school, 
 				teacher, classPeriod, surveyStartDate, surveyEndDate,
-				eventDate, studentAccessCode);
+				eventDate, accessCode);
 		System.out.println("Inserted "+ rows + "rows.");
 		// create a group object with GroupsDAO.find(String) method
 		Group testGroup = new Group();
-		testGroup = testGroupDao.find(groupName);
+		testGroup = testGroupDao.find(name);
 		// display group data on console
 		testGroup.display();
 		// Get the group id to use with createSurveys(int) method.
@@ -107,9 +119,15 @@ public class TestGroupGenerator {
 	 * This is for the purpose of deleting, or checking for
 	 * the existence of a test group.
 	 * @return List<Survey> surveys
+	 * 
+	 * UPDATE: 10/23/2014
+	 * Modified method so that it may be used to retrieve
+	 * any desired group based on the group's name.
+	 * @param name
+	 * 			The name of the group
 	 */
-	public List<Survey> getTestGroup(){
-		Group group = testGroupDao.find(groupName);
+	public List<Survey> getTestGroup(String name){
+		Group group = testGroupDao.find(name);
 		String id = group.getId()+"";
 		System.out.println(id);
 		List<Survey> surveys = new ArrayList<>();
@@ -120,12 +138,11 @@ public class TestGroupGenerator {
 		}
 		
 		return surveys;
-	}
+	}// end getTestGroup(String)
 	
 	/**
 	 * deleteGroupSurveys(List<Survey>)
-	 * This is meant to clear the group data to allow for
-	 * a new test group to be made.
+	 * This is meant to clear the group data
 	 * Removes a desired groups data, from the database.
 	 * Pass in the group object to be deleted.
 	 * Uses delete method from GroupsDAO.
@@ -550,7 +567,9 @@ public class TestGroupGenerator {
 			// children
 			String children = generateChildren();
 			// numChild
-			int numChild = generateNumChild();
+			int numChild = 0;
+			if(children.equals("yes"))
+			numChild = generateNumChild();
 			// cCards
 			String cCards = generateCcards();
 			// cCardUse
@@ -567,7 +586,7 @@ public class TestGroupGenerator {
 			// Make a new object each time through loop, tag the 
 			// incrementing i variable to the end of names to
 			// individualize surveys.
-			student = new Survey(900+i,"fName"+i,"lName"+i,"01/01/2001"+i,gpa,
+			student = new Survey(900+i,"fName"+i,"lName"+i,"01/01/2001",gpa,
 						gender, groupID, education, prefJob,"job",
 						married, 0, children, numChild, cCards, cCardUse,
 						groceries,clothing, "home"+i, "vehicle"+i, 0.0, 0.0,
@@ -669,17 +688,17 @@ public class TestGroupGenerator {
 //		System.out.println(clothing);
 //	// --- END random clothing TEST --- //
 		
-	// --- START createGroupSurveys() TEST --- //
+//	// --- START createGroupSurveys() TEST --- //
 //		TestGroupGenerator testGroup = new TestGroupGenerator();
 //		List<Survey> testSurveys;
-//		testSurveys = testGroup.createGroupSurveys();
+//		testSurveys = testGroup.createGroupSurveys("TestGroup1","Test123");
 //		// display surveys to console with for each loop
 //		for( Survey surveys : testSurveys){
 //			surveys.display();
 //		}// end for each
-	// --- END createGroupSurveys() TEST --- //
+//	// --- END createGroupSurveys() TEST --- //
 		
-//	// --- START retrieveTestGroup() TEST --- //
+//	// --- START getTestGroup() TEST --- //
 //		TestGroupGenerator testGroup = new TestGroupGenerator();
 //		List<Survey> testSurveys = testGroup.retrieveTestGroup();
 //		for(Survey survey : testSurveys){
@@ -690,7 +709,7 @@ public class TestGroupGenerator {
 //	// --- START deleteGroupSurvey(Survey) TEST --- //
 //		
 //		TestGroupGenerator testGroup = new TestGroupGenerator();
-//		List<Survey> testSurveys = testGroup.getTestGroup();	
+//		List<Survey> testSurveys = testGroup.getTestGroup("TestGroup1");	
 //		testGroup.deleteGroupSurveys(testSurveys);
 //		
 //	// --- END deleteGroupSurvey(Survey) TEST --- //

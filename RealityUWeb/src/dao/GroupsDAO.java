@@ -72,7 +72,7 @@ public class GroupsDAO implements DAO {
 				grp.setName(rs.getString("name"));
 				grp.setCreated(rs.getString("created"));
 				grp.setModified(rs.getString("modified"));
-				grp.setHighschool(rs.getString("highschool"));
+				grp.setHighschool(rs.getString("school"));
 				grp.setTeacher(rs.getString("teacher"));
 				grp.setClassPeriod(rs.getString("classPeriod"));
 				grp.setSurveyStartDate(rs.getString("surveyStartDate"));
@@ -139,7 +139,7 @@ public class GroupsDAO implements DAO {
 				grp.setName(rs.getString("name"));
 				grp.setCreated(rs.getString("created"));
 				grp.setModified(rs.getString("modified"));
-				grp.setHighschool(rs.getString("highschool"));
+				grp.setHighschool(rs.getString("school"));
 				grp.setTeacher(rs.getString("teacher"));
 				grp.setClassPeriod(rs.getString("classPeriod"));
 				grp.setSurveyStartDate(rs.getString("surveyStartDate"));
@@ -204,7 +204,7 @@ public class GroupsDAO implements DAO {
 				grp.setName(rs.getString("name"));
 				grp.setCreated(rs.getString("created"));
 				grp.setModified(rs.getString("modified"));
-				grp.setHighschool(rs.getString("highschool"));
+				grp.setHighschool(rs.getString("school"));
 				grp.setTeacher(rs.getString("teacher"));
 				grp.setClassPeriod(rs.getString("classPeriod"));
 				grp.setSurveyStartDate(rs.getString("surveyStartDate"));
@@ -266,7 +266,7 @@ public class GroupsDAO implements DAO {
 				grp.setName(rs.getString("name"));
 				grp.setCreated(rs.getString("created"));
 				grp.setModified(rs.getString("modified"));
-				grp.setHighschool(rs.getString("highschool"));
+				grp.setHighschool(rs.getString("school"));
 				grp.setTeacher(rs.getString("teacher"));
 				grp.setClassPeriod(rs.getString("classPeriod"));
 				grp.setSurveyStartDate(rs.getString("surveyStartDate"));
@@ -315,7 +315,7 @@ public class GroupsDAO implements DAO {
 			conn = DbUtil.createConnection();
 
 			// Create SQL Statement
-			String sql = "UPDATE Group_ SET name=?, created=?, modified=?, highschool=?, " +
+			String sql = "UPDATE Group_ SET name=?, created=?, modified=?, school=?, " +
 						"teacher=?, classPeriod=?, surveyStartDate=?, surveyEndDate=?, eventDate=?, studentAccessCode=? "+ "WHERE id=?";
 
 			stmt = conn.prepareStatement(sql);
@@ -354,7 +354,7 @@ public class GroupsDAO implements DAO {
 	 * @param name
 	 * @param created
 	 * @param modified
-	 * @param highschool
+	 * @param school
 	 * @param teacher
 	 * @param classPeriod 
 	 * @param surveyStartDate
@@ -365,7 +365,7 @@ public class GroupsDAO implements DAO {
 	 *         0: Failure<br>
 	 *         1: Success
 	 */
-	public int insert(String name, String created, String modified, String highschool, 
+	public int insert(String name, String created, String modified, String school, 
 			String teacher, String classPeriod, String surveyStartDate, String surveyEndDate,
 			String eventDate, String studentAccessCode){
 
@@ -385,7 +385,7 @@ public class GroupsDAO implements DAO {
 			conn = DbUtil.createConnection();
 
 			// Create SQL Statement
-			String sql = "INSERT INTO Group_ (name, created, modified, highschool, " +
+			String sql = "INSERT INTO Group_ (name, created, modified, school, " +
 						"teacher, classPeriod, surveyStartDate, surveyEndDate, " +
 						"eventDate, studentAccessCode) " + "VALUES (?,?,?,?,?,?,?,?,?,?)";
 
@@ -393,7 +393,7 @@ public class GroupsDAO implements DAO {
 			stmt.setString(1, name);
 			stmt.setString(2, created);
 			stmt.setString(3, modified);
-			stmt.setString(4, highschool);
+			stmt.setString(4, school);
 			stmt.setString(5, teacher);
 			stmt.setString(6, classPeriod);
 			stmt.setString(7, surveyStartDate);
@@ -416,6 +416,52 @@ public class GroupsDAO implements DAO {
 		return rows;
 
 	}
+	
+	public void insert(Group group){
+		//Check Table & Create Table if it doesn't already exist
+				boolean success = createTable();
+				System.out.println("Check if table exists (create if doesn't exist). Table exists: " + success);
+				
+				// Variable Declarations
+				Connection conn = null;
+				PreparedStatement stmt = null;
+
+				try {
+
+					// Load Driver & Connect to Dbase
+					conn = DbUtil.createConnection();
+
+					// Create SQL Statement
+					String sql = "INSERT INTO Group_ (name, created, modified, school, " +
+								"teacher, classPeriod, surveyStartDate, surveyEndDate, " +
+								"eventDate, studentAccessCode) " + "VALUES (?,?,?,?,?,?,?,?,?,?)";
+
+					stmt = conn.prepareStatement(sql);
+					stmt.setString(1, group.getName());
+					stmt.setString(2, group.getCreated());
+					stmt.setString(3, group.getModified());
+					stmt.setString(4, group.getHighschool());
+					stmt.setString(5, group.getTeacher());
+					stmt.setString(6, group.getClassPeriod());
+					stmt.setString(7, group.getSurveyStartDate());
+					stmt.setString(8, group.getSurveyEndDate());
+					stmt.setString(9, group.getEventDate());
+					stmt.setString(10, group.getStudentAccessCode());
+					System.out.println("SQL: " + sql);
+
+					//Execute Statement
+					int n = stmt.executeUpdate();
+				} catch (Exception e) {
+					// Handle Errors for Class
+					System.out.println("Class Error. Current DB: " + DB + e);
+				} finally {
+					// Close Query, and Database Connection
+					DbUtil.close(stmt);
+					DbUtil.close(conn);
+					System.out.println("Closed Resources");
+				} // End Try/Catch
+				
+	}// end insert(Group)
 
 	//  ==========================  DELETE  ==========================
 	/**
@@ -495,13 +541,14 @@ public class GroupsDAO implements DAO {
 				+ "'name' VARCHAR NOT NULL,"
 				+ "'created' DATETIME,"
 				+ "'modified' DATETIME,"	
-				+ "'highschool' VARCHAR,"
+				+ "'school' VARCHAR,"
 				+ "'teacher' VARCHAR,"
 				+ "'classPeriod' VARCHAR,"
 				+ "'surveyStartDate' DATETIME,"
 				+ "'surveyEndDate' DATETIME,"
 				+ "'eventDate' DATETIME,"
-				+ "'studentAccessCode' VARCHAR)";
+				+ "'studentAccessCode' VARCHAR,"
+				+ "FOREIGN KEY(teacher, school) REFERENCES Teacher(userName, school))";
 		
 		success = DbUtil.createTable(tableName, sql);
 		
@@ -510,32 +557,41 @@ public class GroupsDAO implements DAO {
 
 	
     //   ========================  MAIN METHOD  ==================== 
-	public static void main(String[] args) {		
-		List<Group> lstGrp = new ArrayList<Group>();
-		Group grp = new Group();
-        //Create GroupsDAO & Group Objs and Validate Login
-        GroupsDAO g1 = new GroupsDAO();
-        
-        System.out.println("DB string = " + DAO.DB);
-        
-        //Returns List of Groups matching search criteria (even if only 1)
-        lstGrp = g1.search("name", "Group A"); //Lookup by name         
-        //Extract single Group obj from List
-        //Loop thru Group List (should only be 1 obj in list)
-        for (int i = 0; i < lstGrp.size(); i++)
-        {
-        	if (i == 0) {
-        		grp = lstGrp.get(i);
-        		System.out.println("Extracted Group obj from List.");
-        		grp.display();
-        	} else { //more than one obj in list
-        		System.out.println("Error - Duplicate Username.");
-        	} //end if
-        } //end for
-        
-        
-        boolean n = g1.createTable();
-        System.out.println("Create Table Returns: " + n);
+	public static void main(String[] args) {
+		
+	// --------------- START createTable() TEST --------------- //
+		GroupsDAO dao = new GroupsDAO();
+		dao.createTable();
+	// --------------- END createTable() TEST ---------------- //
+		
+		
+ //The Following is legacy code from the previous class.
+
+//		List<Group> lstGrp = new ArrayList<Group>();
+//		Group grp = new Group();
+//        //Create GroupsDAO & Group Objs and Validate Login
+//        GroupsDAO g1 = new GroupsDAO();
+//        
+//        System.out.println("DB string = " + DAO.DB);
+//        
+//        //Returns List of Groups matching search criteria (even if only 1)
+//        lstGrp = g1.search("name", "Group A"); //Lookup by name         
+//        //Extract single Group obj from List
+//        //Loop thru Group List (should only be 1 obj in list)
+//        for (int i = 0; i < lstGrp.size(); i++)
+//        {
+//        	if (i == 0) {
+//        		grp = lstGrp.get(i);
+//        		System.out.println("Extracted Group obj from List.");
+//        		grp.display();
+//        	} else { //more than one obj in list
+//        		System.out.println("Error - Duplicate Username.");
+//        	} //end if
+//        } //end for
+//        
+//        
+//        boolean n = g1.createTable();
+//        System.out.println("Create Table Returns: " + n);
 
 		
         //Test find
