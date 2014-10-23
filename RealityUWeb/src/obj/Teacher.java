@@ -23,7 +23,7 @@ public class Teacher {
 	
 // ============= PROPERTIES ============================ //
 	
-	private int id;
+	private String userName;
 	private String firstName;
 	private String lastName;
 	private String password;
@@ -35,7 +35,7 @@ public class Teacher {
 	 * Sets properties to default values
 	 */
 	public Teacher(){
-		setId(0);
+		setUserName("User Name");
 		setFname("First Name");
 		setLname("Last Name");
 		setPassword("Password");
@@ -45,8 +45,8 @@ public class Teacher {
 	/**
 	 * Teacher 5 arg constructor
 	 * Sets all properties to specified values
-	 * @param id 
-	 * 			int
+	 * @param userName 
+	 * 			String
 	 * @param fn
 	 * 			String
 	 * @param ln
@@ -56,9 +56,9 @@ public class Teacher {
 	 * @param school
 	 * 			String
 	 */
-	public Teacher(int id, String fn, String ln, String pw,
+	public Teacher(String userName, String fn, String ln, String pw,
 			String school){
-		setId(id);
+		setUserName(userName);
 		setFname(fn);
 		setLname(ln);
 		setPassword(pw);
@@ -67,28 +67,28 @@ public class Teacher {
 	
 	/**
 	 * Teacher 1 arg constructor
-	 * This constructor uses the id parameter to find the 
+	 * This constructor uses the userName parameter to find the 
 	 * desired teacher from the database using the TeachersDAO 
 	 * object. It then assigns all properties to the values 
 	 * retrieved from the database.
-	 * @param id
-	 * 			int
+	 * @param userName
+	 * 			String
 	 */
-	public Teacher(int id){
-		select(id);	
+	public Teacher(String userName){
+		select(userName);	
 	}// end 1 argument constructor
 	
 	
 // ============= START GETTERS/SETTERS ====================== //
 	/**
-	 * @param id
-	 * 			the id to set
+	 * @param userName
+	 * 			the userName to set
 	 */
-	public void setId(int id){this.id = id;}
+	public void setUserName(String userName){this.userName = userName;}
 	/**
-	 * @return the id
+	 * @return the userName
 	 */
-	public int getId(){return this.id;}
+	public String getUserName(){return this.userName;}
 	/**
 	 * @param fname
 	 * 			the first name to set
@@ -134,7 +134,7 @@ public class Teacher {
 	 * property values to the console.
 	 */
 	public void display(){
-		System.out.println("ID = "+getId());
+		System.out.println("UserName = "+getUserName());
 		System.out.println("First Name = "+getFname());
 		System.out.println("Last Name = "+getLname());
 		System.out.println("Password = "+getPassword());
@@ -149,26 +149,26 @@ public class Teacher {
 	 */
 	
 	/**
-	 * select(int) method
-	 * This method utilizes the TeachersDAO select(int) method. 
-	 * @param id
+	 * select(String) method
+	 * This method utilizes the TeachersDAO select(String) method. 
+	 * @param userName
 	 */
-	public void select(int id){
+	public void select(String userName){
 		
 		// Instantiate a TeachersDAO object
 		TeachersDAO dao = new TeachersDAO();
 		
 		// Instantiate a teacher object using the 
-		// TeachersDAO.select(int) method.
-		Teacher teacher = dao.select(id);
+		// TeachersDAO.select(String) method.
+		Teacher teacher = dao.select(userName);
 		
 		// Assign all values to this Teacher object
-		setId(teacher.getId());
+		setUserName(teacher.getUserName());
 		setFname(teacher.getFname());
 		setLname(teacher.getLname());
 		setPassword(teacher.getPassword());
 		setSchool(teacher.getSchool());
-	}
+	}// end select(String)
 	
 	public void update(){		
 		TeachersDAO dao = new TeachersDAO();
@@ -184,7 +184,7 @@ public class Teacher {
 		TeachersDAO dao = new TeachersDAO();
 		dao.delete(this);
 		
-		setId(0);
+		setUserName("User Name");
 		setFname("First Name");
 		setLname("Last Name");
 		setPassword("Password");
@@ -197,34 +197,34 @@ public class Teacher {
 		
 		/*
 		 * This main method is for testing purposes.
-		 * Many of these tests are reliant on the id number,
-		 * which auto increments in the database. Therefore
-		 * you will have to check and update the id numbers
-		 * entered for tests to match the desired id numbers
+		 * Many of these tests are reliant on the userName,
+		 * Therefore you will have to check and update the
+		 * userName entered for tests to match the desired userName
 		 * inside the database.
 		 */
 		
 //	// --------- START insert() TEST ------------ //
-//		Teacher teacher = new Teacher(0,"James","Hammond","123abc","chattCollege");
+//		Teacher teacher = new Teacher("123abc","James","Hammond","123abc","chattCollege");
 //		teacher.insert();
 //	// ----------- END insert() TEST ------------- //
 		
-//	// ----------- START select(int) TEST ------------- //
+//	// ----------- START select(String) TEST ------------- //
 //		Teacher teacher = new Teacher();
-//		teacher.select(2);
+//		teacher.select("123abc");
 //		teacher.display();
-//	// ----------- END select(int) TEST -------------- //
+//	// ----------- END select(String) TEST -------------- //
 		
 //	// ------------ START update() TEST ------------ // 
 //		Teacher teacher = new Teacher();
-//		teacher.select(2);
+//		teacher.select("123abc");
 //		teacher.setFname("Johny");
+//		teacher.display();
 //		teacher.update();
 //	// ------------- END update() TEST ------------- //
 		
 //	// ------------- START delete() TEST ------------ //
 //		Teacher teacher = new Teacher();
-//		teacher.select(2);
+//		teacher.select("123abc");
 //		teacher.delete();
 //	// ------------- END delete() TEST ----------- //
 		
