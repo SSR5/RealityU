@@ -179,6 +179,18 @@ public class TestGroupGenerator {
 		Random random = new Random();
 		// should return a double between 0.5 and 4.0
 		randomGpa = 0.5 + (4.0 - 0.5) * random.nextDouble();
+		// round the double to 2 decimal places.
+		/*
+		 * There was a problem with the round function when I 
+		 * attempted to divide by 100 on the same line. Instead
+		 * of returning 2.34, 0.56, 1.23, 3.56 etc.. it would
+		 * return 3.0, 2.0, 1.0, 3.0, 0.0 etc..
+		 * This issue was resolved by placing the division
+		 * operation on a separate line. 
+		 * I honestly have no idea why doing that fixed it.
+		 */
+		randomGpa = Math.round(randomGpa*100);
+		randomGpa = randomGpa/100;
 		// return double variable 'gpa'
 		return randomGpa;
 	} // end double gpaGenerator() method.
@@ -568,7 +580,7 @@ public class TestGroupGenerator {
 			String children = generateChildren();
 			// numChild
 			int numChild = 0;
-			if(children.equals("yes"))
+			if(children.equals("Yes"))
 			numChild = generateNumChild();
 			// cCards
 			String cCards = generateCcards();
@@ -715,23 +727,12 @@ public class TestGroupGenerator {
 //	// --- END deleteGroupSurvey(Survey) TEST --- //
 		
 
-//	// --- START use test group with process methods TEST --- //
-//		
-//		SurveysDAO surveyDao = new SurveysDAO();
-//		TestGroupGenerator testGroup = new TestGroupGenerator();
-//		List<Survey> testSurveys = testGroup.getTestGroup();
-//		ProcessCreditScore creditScore = new ProcessCreditScore();
-//		ProcessMarried married = new ProcessMarried();
-//		ProcessOccupations occupation = new ProcessOccupations();
-//		testSurveys = married.doProcess(testSurveys);
-//		testSurveys = occupation.doProcess(testSurveys);
-//		testSurveys = creditScore.doProcess(testSurveys);
-//		for(Survey survey : testSurveys){
-//			surveyDao.insert(survey);
-//		}
-//		
-//	// --- END TestGroupGenerator with process methods TEST --- //
-		
+
+	
+//		TestGroupGenerator tgg = new TestGroupGenerator();
+//		tgg.createGroupSurveys("test1", "abc123");
+//		List<Survey> testGroup = tgg.getTestGroup("test1");
+//		tgg.deleteGroupSurveys(testGroup);
 		
 	}// end main
 

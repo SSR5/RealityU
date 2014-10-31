@@ -3,6 +3,10 @@ package dao;
 /********************************************************************
  *	RealityUWeb: AdminstratorsDAO.java
  *  3/11/2014
+ *  @author Cookie Monster
+ *  
+ *  EDITED BY:					DATE:				DESCRIPTION:
+ *  James Hammond, SSR			10/31/2014			Added select(String) method. Added insert(Administrator) method. Added property 'master' to all database methods.
  ********************************************************************/
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -82,6 +86,7 @@ public class AdministratorsDAO implements DAO {
 				admin.setPassword(rs.getString("password"));
 				admin.setFname(rs.getString("fname"));
 				admin.setLname(rs.getString("lname"));
+				admin.setMaster(rs.getInt("master"));
 
 				lstAdmin.add(admin);
 			}
@@ -146,6 +151,7 @@ public class AdministratorsDAO implements DAO {
 				admin.setPassword(rs.getString("password"));
 				admin.setFname(rs.getString("fname"));
 				admin.setLname(rs.getString("lname"));
+				admin.setMaster(rs.getInt("master"));
 			}
 		} catch (Exception e) {
 			// Handle Errors for Class
@@ -160,6 +166,65 @@ public class AdministratorsDAO implements DAO {
 
 		return admin;
 	} // end find
+	
+	/**
+	 * select(String)
+	 * @param id
+	 * @return
+	 */
+	public Administrator select(String userName) {
+		// Check Table & Create Table if it doesn't already exist
+		boolean success = createTable();
+		System.out
+				.println("Check if table exists (create if doesn't exist). Table exists: "
+						+ success);
+
+		// Variable Declarations
+		Connection conn = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+
+		Administrator admin = new Administrator();
+
+		String sql = "";
+		String strWhere = "";
+
+		try {
+			// Load Driver & Connect to Dbase
+			conn = DbUtil.createConnection();
+
+			// Create SQL Statement
+			strWhere = "WHERE username = " + "'"+ userName+"'";
+
+			sql = "SELECT * FROM Administrator " + strWhere;
+			stmt = conn.prepareStatement(sql);
+			System.out.println("SQL: " + sql);
+
+			// Execute Statement - Get ResultSet by Column Name
+			rs = stmt.executeQuery();
+
+			// Process the ResultSet
+			while (rs.next()) {
+				admin.setId(rs.getInt("id"));
+				admin.setUsername(rs.getString("username"));
+				admin.setPassword(rs.getString("password"));
+				admin.setFname(rs.getString("fname"));
+				admin.setLname(rs.getString("lname"));
+				admin.setMaster(rs.getInt("master"));
+			}
+		} catch (Exception e) {
+			// Handle Errors for Class
+			System.out.println("Class Error. Current DB: " + DB + e);
+		} finally {
+			// Close ResultSet, Query, and Database Connection
+			DbUtil.close(rs);
+			DbUtil.close(stmt);
+			DbUtil.close(conn);
+			System.out.println("Closed Resources");
+		} // End Try/Catch
+
+		return admin;
+	} // end select(String)
 
 	// ========================== UPDATE ==========================
 	/**
@@ -188,7 +253,7 @@ public class AdministratorsDAO implements DAO {
 			conn = DbUtil.createConnection();
 
 			// Create SQL Statement
-			String sql = "UPDATE Administrator SET username=?, password=?, fname=?, lname=? "
+			String sql = "UPDATE Administrator SET username=?, password=?, fname=?, lname=?, master=? "
 					+ "WHERE id=?";
 
 			stmt = conn.prepareStatement(sql);
@@ -196,7 +261,8 @@ public class AdministratorsDAO implements DAO {
 			stmt.setString(2, admin.getPassword());
 			stmt.setString(3, admin.getFname());
 			stmt.setString(4, admin.getLname());
-			stmt.setInt(5, admin.getId());
+			stmt.setInt(5, admin.getMaster());
+			stmt.setInt(6, admin.getId());
 			System.out.println("SQL: " + sql);
 
 			// Execute Statement
@@ -231,7 +297,7 @@ public class AdministratorsDAO implements DAO {
 	 *         1: Success
 	 */
 	public int insert(String username, String password, String fname,
-			String lname) {
+			String lname, int master) {
 		// Check Table & Create Table if it doesn't already exist
 		boolean success = createTable();
 		System.out
@@ -250,14 +316,15 @@ public class AdministratorsDAO implements DAO {
 			conn = DbUtil.createConnection();
 
 			// Create SQL Statement
-			String sql = "INSERT INTO Administrator (username, password, fname, lname) "
-					+ "VALUES (?,?,?,?)";
+			String sql = "INSERT INTO Administrator (username, password, fname, lname, master) "
+					+ "VALUES (?,?,?,?,?)";
 
 			stmt = conn.prepareStatement(sql);
 			stmt.setString(1, username);
 			stmt.setString(2, password);
 			stmt.setString(3, fname);
 			stmt.setString(4, lname);
+			stmt.setInt(5, master);
 			System.out.println("SQL: " + sql);
 
 			// Execute Statement
@@ -274,18 +341,15 @@ public class AdministratorsDAO implements DAO {
 		return rows;
 
 	}
-
-	// ========================== DELETE ==========================
+	
 	/**
-	 * Delete an Administrator.
-	 * 
+	 * insert(Administrator)
 	 * @param admin
-	 *            : The Administrator to delete
-	 * @return Returns an integer:<br>
-	 *         0: Failure<br>
-	 *         1: Success
-	 */
-	public int delete(Administrator admin) {
+	 * 		The administrator object to be added to the database
+	 * This allows an easy way to insert the properties of an 
+	 * Administrator object that has already been instantiated.
+	 */	
+	public void insert(Administrator admin) {
 		// Check Table & Create Table if it doesn't already exist
 		boolean success = createTable();
 		System.out
@@ -295,7 +359,56 @@ public class AdministratorsDAO implements DAO {
 		// Variable Declarations
 		Connection conn = null;
 		PreparedStatement stmt = null;
-		int rows = 0;
+
+
+		try {
+
+			// Load Driver & Connect to Dbase
+			conn = DbUtil.createConnection();
+
+			// Create SQL Statement
+			String sql = "INSERT INTO Administrator (username, password, fname, lname, master) "
+					+ "VALUES (?,?,?,?,?)";
+
+			stmt = conn.prepareStatement(sql);
+			stmt.setString(1, admin.getUsername());
+			stmt.setString(2, admin.getPassword());
+			stmt.setString(3, admin.getFname());
+			stmt.setString(4, admin.getLname());
+			stmt.setInt(5, admin.getMaster());
+			System.out.println("SQL: " + sql);
+
+			// Execute Statement
+			int n = stmt.executeUpdate();
+		} catch (Exception e) {
+			// Handle Errors for Class
+			System.out.println("Class Error. Current DB: " + DB + e);
+		} finally {
+			// Close Query, and Database Connection
+			DbUtil.close(stmt);
+			DbUtil.close(conn);
+			System.out.println("Closed Resources");
+		} // End Try/Catch
+
+	}// end insert(Administrator)
+
+	// ========================== DELETE ==========================
+	/**
+	 * Delete an Administrator.
+	 * 
+	 * @param admin
+	 *            : The Administrator to delete
+	 */
+	public void delete(Administrator admin) {
+		// Check Table & Create Table if it doesn't already exist
+		boolean success = createTable();
+		System.out
+				.println("Check if table exists (create if doesn't exist). Table exists: "
+						+ success);
+
+		// Variable Declarations
+		Connection conn = null;
+		PreparedStatement stmt = null;
 
 		try {
 			// Load Driver & Connect to Dbase
@@ -308,7 +421,7 @@ public class AdministratorsDAO implements DAO {
 			System.out.println("SQL: " + sql);
 
 			// Execute Statement
-			rows = stmt.executeUpdate();
+			int n = stmt.executeUpdate();
 
 		} catch (Exception e) {
 			// Handle Errors for Class
@@ -320,8 +433,7 @@ public class AdministratorsDAO implements DAO {
 			System.out.println("Closed Resources");
 		} // End Try/Catch
 
-		return rows;
-	}
+	}// end delete
 
 	// ========================== CHECK TABLE ==========================
 	/**
@@ -353,8 +465,10 @@ public class AdministratorsDAO implements DAO {
 		String sql = "CREATE TABLE IF NOT EXISTS " + tableName
 				+ " ('id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,"
 				+ "'username' VARCHAR NOT NULL,"
-				+ "'password' VARCHAR NOT NULL," + "'fname' VARCHAR,"
-				+ "'lname' VARCHAR)";
+				+ "'password' VARCHAR NOT NULL," 
+				+ "'fname' VARCHAR,"
+				+ "'lname' VARCHAR,"
+				+ "'master' INTEGER);";
 
 		success = DbUtil.createTable(tableName, sql);
 
@@ -402,7 +516,7 @@ public class AdministratorsDAO implements DAO {
 
 		// Test insert
 		// AdministratorsDAO adao1 = new AdministratorsDAO();
-		// int rows = adao1.insert("test4", "pwd4", "Mary", "Tester");
+		// int rows = adao1.insert("test4", "pwd4", "Mary", "Tester",0);
 		// Administrator adm = new Administrator();
 		// adm = adao1.find(4);
 		// adm.display();
