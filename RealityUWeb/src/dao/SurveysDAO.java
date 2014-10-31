@@ -445,7 +445,7 @@ public class SurveysDAO implements DAO {
 					stmt.setInt(11, student.getSpouse());
 					
 					stmt.setString(12, student.getChildren());
-					stmt.setInt(13, student.getGroupID());
+					stmt.setInt(13, student.getNumChild());
 					stmt.setString(14, student.getCCards());
 				
 					stmt.setString(15, student.getCCardUses());
